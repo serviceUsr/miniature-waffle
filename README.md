@@ -1,9 +1,9 @@
-# OpenWrt GitHub Action SDK
+# OpenWrt GitHub Action Image Builder
 
-GitHub CI action to build packages via SDK using official OpenWrt SDK Docker
-containers. This is primary used to test build OpenWrt repositories but can
-also be used for downstream projects maintaining their own package
-repositories.
+GitHub CI action to build images via Image Builder using official OpenWrt
+Image Builder Docker containers. This is primary used to test build OpenWrt
+repositories but can also be used for downstream projects maintaining their
+own package repositories.
 
 ## Example usage
 

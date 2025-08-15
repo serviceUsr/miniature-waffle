@@ -1,30 +1,62 @@
-name: "OpenWrt SDK"
-description: "Build OpenWrt packages via the SDK"
+name: "OpenWrt ImageBuilder"
+description: "Build OpenWrt images via the Image Builder"
 author: aparcar
+
+inputs:
+  release:
+    description: 'Which Release to use'
+    required: true
+    default: 'main'
+  target-name:
+    description: 'Which Target to use (e.g. x86-64)'
+    required: true
+outputs:
+  target:
+    description: "primary target name (e.g. x86)"
+    value: ${{ steps.outputs.outputs.target }}
+  subtarget:
+    description: "subtarget name (e.g. 64)"
+    value: ${{ steps.outputs.outputs.subtarget }}
+
 runs:
   using: 'composite'
   steps:
+
     - run: |
         echo "artifacts_dir=${ARTIFACTS_DIR:-$GITHUB_WORKSPACE}" >> "$GITHUB_OUTPUT"
-        echo "feed_dir=${FEED_DIR:-$GITHUB_WORKSPACE}" >> "$GITHUB_OUTPUT"
+        echo "keys_dir=${KEYS_DIR:-$GITHUB_WORKSPACE/keys}" >> "$GITHUB_OUTPUT"
+        echo "files_dir=${KEYS_DIR:-$GITHUB_WORKSPACE/files}" >> "$GITHUB_OUTPUT"
       shell: bash
       id: inputs
-    - run: sudo chown -R 1000:1000 ${{ steps.inputs.outputs.artifacts_dir }} ${{ steps.inputs.outputs.feed_dir }}
+
+    - run: |
+        echo "subtarget=${TARGET#*-}" >> "$GITHUB_OUTPUT"
+        echo "target=${TARGET%-*}" >> "$GITHUB_OUTPUT"
+      env:
+        TARGET: ${{ inputs.target-name }}
       shell: bash
-    -
-      name: Set up Docker QEMU
+      id: outputs
+
+    # - run: mkdir -p ${{ steps.inputs.outputs.keys_dir }}
+    #   shell: bash
+    - run: ls -lR ${{ steps.inputs.outputs.keys_dir }} || true
+      shell: bash
+    - run: sudo chown -R 1000:1000 ${{ steps.inputs.outputs.artifacts_dir }} ${{ steps.inputs.outputs.keys_dir }}
+      shell: bash
+    - run: sudo chown -R 1000:1000 ${{ steps.inputs.outputs.artifacts_dir }} ${{ steps.inputs.outputs.keys_dir }}
+      shell: bash
+    - name: Set up Docker QEMU
       uses: docker/setup-qemu-action@v3
-    -
-      name: Set up Docker Buildx
+    - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-    -
-      name: Build Docker container image
+    - name: Build Docker container image
       uses: docker/build-push-action@v6
       env:
         DOCKER_BUILD_SUMMARY: false
+        ARCH: ${{ inputs.target-name }}-${{ inputs.release }}
       with:
         push: false
-        tags: sdk
+        tags: imagebuilder
         context: ${{ github.action_path }}
         build-args: |
           CONTAINER
@@ -33,27 +65,31 @@ runs:
         cache-from: type=gha,scope=${{ env.CONTAINER }}-${{ env.ARCH }}
         load: true
 
-    - run: |
+    - name: docker run
+      run: |
+        MOUNT_OPTIONS=""
+        if [[ -n "$FILES_DIR" ]]; then
+          MOUNT_OPTIONS+="-v ${FILES_DIR}:/files "
+        fi
+        if [[ -n "$KEYS_DIR" ]]; then
+          MOUNT_OPTIONS+="-v ${{ steps.inputs.outputs.keys_dir }}:/keys "
+        fi
+        echo "$MOUNT_OPTIONS"
         docker run --rm \
-          --env BUILD_LOG \
-          --env EXTRA_FEEDS \
-          --env FEEDNAME \
-          --env IGNORE_ERRORS \
-          --env KEY_BUILD \
-          --env PRIVATE_KEY \
-          --env NO_DEFAULT_FEEDS \
-          --env NO_REFRESH_CHECK \
-          --env NO_SHFMT_CHECK \
+          --env PROFILE \
           --env PACKAGES \
-          --env INDEX \
-          --env V \
+          --env FILES_DIR \
+          --env EXTRA_IMAGE_NAME \
+          --env DISABLED_SERVICES \
+          --env ADD_LOCAL_KEY \
+          --env ROOTFS_PARTSIZE \
+          --env NO_DEFAULT_REPOS \
+          --env CUSTOM_REPO \
+          --env KEYS_DIR \
           -v ${{ steps.inputs.outputs.artifacts_dir }}:/artifacts \
-          -v ${{ steps.inputs.outputs.feed_dir }}:/feed \
-          sdk
+          $MOUNT_OPTIONS \
+          imagebuilder
       shell: bash
     - run: sudo chown -R --reference=${{ steps.inputs.outputs.artifacts_dir }}/.. ${{ steps.inputs.outputs.artifacts_dir }}
-      shell: bash
-      if: always()
-    - run: sudo chown -R --reference=${{ steps.inputs.outputs.feed_dir }}/.. ${{ steps.inputs.outputs.feed_dir }}
       shell: bash
       if: always()

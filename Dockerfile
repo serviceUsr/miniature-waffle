@@ -1,8 +1,8 @@
-ARG CONTAINER=ghcr.io/openwrt/sdk
-ARG ARCH=mips_24kc
+ARG CONTAINER=ghcr.io/openwrt/imagebuilder
+ARG ARCH=mediatek-filogic
 FROM $CONTAINER:$ARCH
 
-LABEL "com.github.actions.name"="OpenWrt SDK"
+LABEL "com.github.actions.name"="OpenWrt ImageBuilder"
 
 ADD entrypoint.sh /
 
