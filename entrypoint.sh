@@ -91,7 +91,7 @@ for profile in $PROFILE; do
 	endgroup
 
 	if [ "$RET" -ne 0 ]; then
-		echo "::error:: => building $profile failed: $RET"
+		echo "::error:: building $profile failed"
 		exit "$RET"
 	fi
 done

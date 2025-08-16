@@ -49,7 +49,7 @@ jobs:
           target-name: ${{ matrix.target }}
         env:
           ARTIFACTS_DIR: ${{ github.workspace }}/artifacts
-          PACKAGES: nano htop tcpdump tmux ethtool-full jq uconfig uconfig-cli uconfig-client uconfig-mod-fingerprint uconfig-mod-lldp dcs
+          PACKAGES: nano htop tcpdump tmux ethtool-full jq uconfig uconfig-cli uconfig-client uconfig-mod-fingerprint uconfig-mod-lldp
           # PACKAGES: nano htop tcpdump tmux ethtool-full
           PROFILE: ${{ matrix.device }}
           # NO_DEFAULT_REPOS: 1
