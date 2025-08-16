@@ -23,7 +23,7 @@ jobs:
             device: generic
             distrib_arch: x86_64
           - target: mediatek-filogic
-            device: zyxel_nwa50ax-pro
+            device: zyxel_nwa50ax-pro openwrt_one
             distrib_arch: aarch64_cortex-a53
           # - target: ramips-mt7621
           #   device: genexis_pulse-ex400
