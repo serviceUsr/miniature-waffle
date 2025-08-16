@@ -37,7 +37,7 @@ if [[ -f repositories ]]; then
 elif [[ -f repositories.conf ]]; then
 	REPO_FILE="repositories.conf"
 else
-	echo "::warning no repositories file found"
+	echo "::warning:: no repositories file found"
 fi
 echo "$REPO_FILE"
 cat $REPO_FILE
@@ -87,11 +87,11 @@ for profile in $PROFILE; do
 		EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME" \
 		DISABLED_SERVICES="$DISABLED_SERVICES" \
 		ADD_LOCAL_KEY="$ADD_LOCAL_KEY" \
-		ROOTFS_PARTSIZE="$ROOTFS_PARTSIZE" || RET=$? || true
+		ROOTFS_PARTSIZE="$ROOTFS_PARTSIZE" || RET=$?
 	endgroup
 
 	if [ "$RET" -ne 0 ]; then
-		echo "::error => building $profile failed: $RET"
+		echo "::error:: => building $profile failed: $RET"
 		exit "$RET"
 	fi
 done
