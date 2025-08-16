@@ -77,9 +77,8 @@ group "ls -lR keys"
 ls -lR keys
 endgroup
 
-
 for profile in $PROFILE; do
-	group "building ${profile}"
+	group "building image for ${profile}"
 	make image \
 		PROFILE="$profile" \
 		PACKAGES="$PACKAGES" \
@@ -88,12 +87,13 @@ for profile in $PROFILE; do
 		DISABLED_SERVICES="$DISABLED_SERVICES" \
 		ADD_LOCAL_KEY="$ADD_LOCAL_KEY" \
 		ROOTFS_PARTSIZE="$ROOTFS_PARTSIZE" || RET=$?
-	endgroup
 
 	if [ "$RET" -ne 0 ]; then
 		echo "::error:: building $profile failed"
 		exit "$RET"
 	fi
+
+	endgroup
 done
 
 if [ -d bin/ ]; then
