@@ -91,8 +91,7 @@ for profile in $PROFILE; do
 	endgroup
 
 	if [ "$RET" -ne 0 ]; then
-		echo "::error => building $profile failed"
-		echo_red   "=> Package check failed: $RET)"
+		echo "::error => building $profile failed: $RET"
 		exit "$RET"
 	fi
 done
